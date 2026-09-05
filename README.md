@@ -4,11 +4,14 @@ WorldBridge（世界之桥）模组的公开 API 模块。本仓库仅包含**�
 
 ## 模块结构
 
-每个 Minecraft 版本一个独立工程目录：
+每个 Minecraft 版本一个独立工程目录，**十分支全覆盖**：
 
 ```
-1.20.1/    ← 当前支持 1.20.1
+1.19/ 1.19.1/ 1.19.2/ 1.19.3/ 1.19.4/    ← Minecraft 1.19.x
+1.20/ 1.20.1/ 1.20.2/ 1.20.3/ 1.20.4/    ← Minecraft 1.20.x
 ```
+
+各目录为独立 ForgeGradle 库工程，按对应 MC/Forge 版本编译，产出各自的 `worldbridge-api-{version}-{mc}.jar`。
 
 ## API 总览
 
@@ -58,7 +61,7 @@ public void onRedlinkPair(RedlinkEvents.RedlinkPairEvent event) {
 ## 版本
 
 - `mod_version` 跟随 WorldBridge 主 mod 同步推进（当前 0.5.0）
-- 仅 1.20.1；更多 MC 版本后续补充
+- 覆盖 Minecraft **1.19 ~ 1.20.4 共 10 个版本**（Forge 41.0.68+ ~ 49.1.0+）
 
 ## License
 
