@@ -11,7 +11,7 @@ WorldBridge（世界之桥）模组的公开 API 模块。本仓库仅包含**�
 1.20/ 1.20.1/ 1.20.2/ 1.20.3/ 1.20.4/    ← Minecraft 1.20.x
 ```
 
-各目录为独立 ForgeGradle 库工程，按对应 MC/Forge 版本编译，产出各自的 `worldbridge-api-{version}-{mc}.jar`。
+各目录为独立 ForgeGradle 库工程，按对应 MC/Forge 版本编译，产出的 jar 已发布到 Maven Central（坐标见下）。
 
 ## API 总览
 
@@ -26,15 +26,32 @@ WorldBridge（世界之桥）模组的公开 API 模块。本仓库仅包含**�
 
 ## 附属 mod 依赖方式
 
-### 1. 开发期（compileOnly）
+### 1. 从 Maven Central 拉取（推荐）
 
-将仓库中对应版本目录加入工程源码路径，或把编译产物 jar 作为 `compileOnly` 依赖：
+WorldBridge-API 已发布到 **Maven Central**（`io.github.mow2333`），附属 mod 无需配置自定义仓库，直接声明坐标即可：
+
+```groovy
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 选择与你的 Minecraft 版本对应的 artifact
+    compileOnly 'io.github.mow2333:worldbridge-api-1.20.1:0.5.0'
+    // 例如 1.19.4 → worldbridge-api-1.19.4；1.20.4 → worldbridge-api-1.20.4 ...
+}
+```
+
+> artifact 后缀即 Minecraft 版本：`worldbridge-api-1.19` / `1.19.1` / … / `1.20.4`
+> 运行期仍需要安装 WorldBridge 主 mod（实现闭源提供）。
+
+### 2. 源码方式（可选）
+
+将仓库中对应版本目录加入工程源码路径：
 
 ```groovy
 // 以 1.20.1 为例
-dependencies {
-    compileOnly files('WorldBridge-API/1.20.1/build/libs/worldbridge-api-0.5.0-1.20.1.jar')
-}
+sourceSets.main.java.srcDirs += file('WorldBridge-API/1.20.1/src/main/java')
 ```
 
 ### 2. 调用约定

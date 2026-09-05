@@ -1,13 +1,15 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = "${mod_version}-${minecraft_version}"
-group = mod_group_id
+version = "${mod_version}"
+group = 'io.github.mow2333'
 
 base {
-    archivesName = 'worldbridge-api'
+    archivesName = "worldbridge-api-${minecraft_version}"
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
@@ -31,6 +33,76 @@ dependencies {
 
 java {
     withSourcesJar()
+    withJavadocJar()
+}
+
+// Central requires a javadoc jar. MC classes are only on the compile classpath,
+// so relax doclint & ignore unresolved-symbol noise; the jar just needs to exist & be valid.
+tasks.named('javadoc', Javadoc).configure {
+    options.encoding = 'UTF-8'
+    options.addBooleanOption('Xdoclint:none', true)
+    failOnError = false
+}
+
+// ===== Maven Central Publishing (io.github.mow2333) =====
+// Credentials come from ~/.gradle/gradle.properties (outside git):
+//   sonatypeUsername / sonatypePassword
+// GPG signing via system gpg (useGpgCmd): passphrase prompt pops up via gpg-agent (Kleopatra).
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+            artifactId = "worldbridge-api-${minecraft_version}"
+            pom {
+                name = 'WorldBridge API'
+                description = 'WorldBridge（世界之桥）公开 API：维度/红链/跨维漏斗/地球仪 接口与事件（Minecraft ' + project.minecraft_version + '）'
+                url = 'https://github.com/mow2333/WorldBridge-API'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'mow2333'
+                        name = 'Mow2333'
+                        email = 'samuel202201@163.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/mow2333/WorldBridge-API.git'
+                    developerConnection = 'scm:git:ssh://github.com/mow2333/WorldBridge-API.git'
+                    url = 'https://github.com/mow2333/WorldBridge-API'
+                }
+                // Strip any Minecraft/Forge deps leaking from the FG minecraft configuration.
+                // The API jar itself declares no runtime deps; consumers compile against their own MC env.
+                withXml {
+                    def deps = asNode().get('dependencies')
+                    if (deps != null) deps.replaceNode({})
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'central'
+            // Central Publisher Portal OSSRH-compatible staging endpoint (new Portal, not legacy s01)
+            url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
+            credentials {
+                username = findProperty('sonatypeUsername')
+                password = findProperty('sonatypePassword')
+            }
+        }
+    }
+}
+
+signing {
+    // Traditional keyring-based signing (no dependence on gpg being on PATH).
+    // Credentials come from ~/.gradle/gradle.properties (outside git):
+    //   signing.keyId / signing.password / signing.secretKeyRingFile
+    sign publishing.publications.mavenJava
 }
 
 tasks.withType(JavaCompile).configureEach {
